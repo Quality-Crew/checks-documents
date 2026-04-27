@@ -843,7 +843,7 @@ function buildAdminConfirm(){
   else if(adminAction.type==="remove"){title="Remove user";msg="Remove <strong>"+adminAction.name+"</strong>? They will lose access.";btnCol="#991b1b";btnTxt="Yes, remove";}
   else if(adminAction.type==="demote"){title="Remove admin";msg="Remove admin access from <strong>"+adminAction.name+"</strong>? They will become a regular team member.";btnCol="#854d0e";btnTxt="Yes, remove admin";}
   return '<div id="overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;z-index:200">'+
-    '<div style="background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:430px;margin:0 auto">'+
+    '<div style="background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:430px;margin:0 auto;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch">'+
     '<div style="width:38px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 18px"></div>'+
     '<div style="font-weight:700;font-size:18px;margin-bottom:10px">'+title+'</div>'+
     '<div style="font-size:14px;color:#64748b;margin-bottom:20px">'+msg+'</div>'+
@@ -889,7 +889,7 @@ function buildModal(){
   var site=modal.site,type=modal.type,schedMin=modal.schedMin,ds=modal.ds,c=SITE_CFG[site];
   var infoBar='<div style="font-size:13px;color:#64748b;background:#f8fafc;border-radius:10px;padding:9px 13px;margin-bottom:16px"><span style="color:'+c.color+';font-weight:600">'+site+'</span> &mdash; '+CHECK_CFG[type].label+' &mdash; '+fmtMin(schedMin)+'</div>';
   var wrap='<div id="overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;z-index:200">'+
-    '<div style="background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:430px;margin:0 auto">'+
+    '<div style="background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:430px;margin:0 auto;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch">'+
     '<div style="width:38px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 18px"></div>';
   if(modal.mode==="edit"){
     var entry=checks[ckKey(ds,site,type,schedMin)];
