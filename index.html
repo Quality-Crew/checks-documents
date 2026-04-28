@@ -1075,6 +1075,10 @@ function buildFujiMiceFields(){
       html2+='<button data-hygiene="'+ai+'|N/A" style="'+btnBase+'flex:1;background:'+(ar.hygieneClean==="N/A"?"#64748b":"#f1f5f9")+';color:'+(ar.hygieneClean==="N/A"?"#fff":"#475569")+'">N/A</button>';
       html2+='</div>';
       html2+='</div>';
+      html2+='<div style="margin-top:10px">';
+      html2+='<label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px">Hygiene staff name <span style="font-weight:400;color:#94a3b8">(optional, max 100 chars)</span></label>';
+      html2+='<input id="hygiene-staff-'+ai+'" type="text" maxlength="100" placeholder="Enter hygiene staff name..." value="'+ar.hygieneStaff.replace(/</g,"&lt;")+'" style="width:100%;padding:9px 11px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;background:#fff;outline:none;font-family:inherit;box-sizing:border-box"/>';
+      html2+='</div>';
     }
     html2+='</div>';
   }
@@ -1304,7 +1308,7 @@ function downloadFujiMiceForm(ds){
         +'<td style="border:1px solid #000;padding:4px;font-size:8pt">'+ca+'</td>'
         +'<td style="border:1px solid #000;padding:4px;font-size:8pt">'+staffName+'</td>'
         +'<td style="border:1px solid #000;padding:4px;font-size:8pt;text-align:center">'+hygiene+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt"></td>'
+        +'<td style="border:1px solid #000;padding:4px;font-size:8pt">'+(ar.hygieneStaff&&ar.hygieneStaff!=="N/A"?ar.hygieneStaff:"N/A")+'</td>'
         +'</tr>';
     }
     return rows;
@@ -1443,7 +1447,7 @@ function render(){
   var tabBtns=app.querySelectorAll("[data-tab]");
   for(var i=0;i<tabBtns.length;i++){(function(el){el.addEventListener("click",function(){tab=el.dataset.tab;historyDay=null;overviewSite=null;doAutoScroll=(SITES.indexOf(tab)>=0);if(tab!=="documents"){docDate=null;docSite=null;docCheck=null;}render();});})(tabBtns[i]);}
   var logBtns=app.querySelectorAll("[data-log]");
-  for(var i=0;i<logBtns.length;i++){(function(el){el.addEventListener("click",function(e){if(e.target.closest("[data-edit]"))return;var p=el.dataset.log.split("||");modal={mode:"log",site:p[0],type:p[1],schedMin:parseInt(p[2]),ds:p[3]};modalComment="";modalPhotos=[];modalTorchBefore=null;modalTorchBeforeAction="";modalTorchAfter=null;modalTorchAfterAction="";modalAreas=[{pestActivity:null,correctiveAction:"",hygieneClean:"N/A"},{pestActivity:null,correctiveAction:"",hygieneClean:"N/A"}];render();});})(logBtns[i]);}
+  for(var i=0;i<logBtns.length;i++){(function(el){el.addEventListener("click",function(e){if(e.target.closest("[data-edit]"))return;var p=el.dataset.log.split("||");modal={mode:"log",site:p[0],type:p[1],schedMin:parseInt(p[2]),ds:p[3]};modalComment="";modalPhotos=[];modalTorchBefore=null;modalTorchBeforeAction="";modalTorchAfter=null;modalTorchAfterAction="";modalAreas=[{pestActivity:null,correctiveAction:"",hygieneClean:"N/A",hygieneStaff:""},{pestActivity:null,correctiveAction:"",hygieneClean:"N/A",hygieneStaff:""}];render();});})(logBtns[i]);}
   var editBtns=app.querySelectorAll("[data-edit]");
   for(var i=0;i<editBtns.length;i++){(function(el){el.addEventListener("click",function(e){e.stopPropagation();var p=el.dataset.edit.split("||");modal={mode:"edit",site:p[0],type:p[1],schedMin:parseInt(p[2]),ds:p[3]};render();});})(editBtns[i]);}
   // Overview site boxes → open inline detail
@@ -1498,7 +1502,7 @@ function render(){
   }
   var rlb=document.getElementById("relog-btn");if(rlb)rlb.addEventListener("click",function(){modal.mode="relog";modalComment="";modalPhotos=[];render();});
   var dlb=document.getElementById("delete-btn");if(dlb)dlb.addEventListener("click",deleteLog);
-  var ccb=document.getElementById("cancel-btn");if(ccb)ccb.addEventListener("click",function(){modal=null;modalComment="";modalPhotos=[];modalTorchBefore=null;modalTorchBeforeAction="";modalTorchAfter=null;modalTorchAfterAction="";modalAreas=[{pestActivity:null,correctiveAction:"",hygieneClean:"N/A"},{pestActivity:null,correctiveAction:"",hygieneClean:"N/A"}];render();});
+  var ccb=document.getElementById("cancel-btn");if(ccb)ccb.addEventListener("click",function(){modal=null;modalComment="";modalPhotos=[];modalTorchBefore=null;modalTorchBeforeAction="";modalTorchAfter=null;modalTorchAfterAction="";modalAreas=[{pestActivity:null,correctiveAction:"",hygieneClean:"N/A",hygieneStaff:""},{pestActivity:null,correctiveAction:"",hygieneClean:"N/A",hygieneStaff:""}];render();});
   var ov=document.getElementById("overlay");if(ov)ov.addEventListener("click",function(e){if(e.target===ov){modal=null;adminAction=null;render();}});
   var nb=document.getElementById("notif-bar");if(nb)nb.addEventListener("click",function(){if(typeof Notification!=="undefined")Notification.requestPermission().then(function(p){notifPerm=p;render();});});
   var approveBtns=app.querySelectorAll("[data-approve]");
@@ -1540,7 +1544,7 @@ function render(){
   for(var i=0;i<taBtns.length;i++){(function(el){el.addEventListener("click",function(e){e.stopPropagation();modalTorchAfter=el.dataset.torchafter;var taa=document.getElementById("taa-text");if(taa)modalTorchAfterAction=taa.value;render();});})(taBtns[i]);}
   // Pest activity toggles
   var paBtns=app.querySelectorAll("[data-pestact]");
-  for(var i=0;i<paBtns.length;i++){(function(el){el.addEventListener("click",function(e){e.stopPropagation();var parts=el.dataset.pestact.split("|");var idx=parseInt(parts[0]),val=parts[1];var ca=document.getElementById("area-ca-"+idx);if(ca)modalAreas[idx].correctiveAction=ca.value;modalAreas[idx].pestActivity=val;if(val==="No")modalAreas[idx].hygieneClean="N/A";render();});})(paBtns[i]);}
+  for(var i=0;i<paBtns.length;i++){(function(el){el.addEventListener("click",function(e){e.stopPropagation();var parts=el.dataset.pestact.split("|");var idx=parseInt(parts[0]),val=parts[1];var ca=document.getElementById("area-ca-"+idx);if(ca)modalAreas[idx].correctiveAction=ca.value;var hs=document.getElementById("hygiene-staff-"+idx);if(hs)modalAreas[idx].hygieneStaff=hs.value;modalAreas[idx].pestActivity=val;if(val==="No"){modalAreas[idx].hygieneClean="N/A";modalAreas[idx].hygieneStaff="";}render();});})(paBtns[i]);}
   // Hygiene clean toggles
   var hcBtns=app.querySelectorAll("[data-hygiene]");
   for(var i=0;i<hcBtns.length;i++){(function(el){el.addEventListener("click",function(e){e.stopPropagation();var parts=el.dataset.hygiene.split("|");var idx=parseInt(parts[0]),val=parts[1];modalAreas[idx].hygieneClean=val;render();});})(hcBtns[i]);}
@@ -1549,6 +1553,8 @@ function render(){
   var taaT=document.getElementById("taa-text");if(taaT)taaT.addEventListener("input",function(e){modalTorchAfterAction=e.target.value.slice(0,200);});
   var ca0=document.getElementById("area-ca-0");if(ca0)ca0.addEventListener("input",function(e){modalAreas[0].correctiveAction=e.target.value.slice(0,200);});
   var ca1=document.getElementById("area-ca-1");if(ca1)ca1.addEventListener("input",function(e){modalAreas[1].correctiveAction=e.target.value.slice(0,200);});
+  var hs0=document.getElementById("hygiene-staff-0");if(hs0)hs0.addEventListener("input",function(e){modalAreas[0].hygieneStaff=e.target.value.slice(0,100);});
+  var hs1=document.getElementById("hygiene-staff-1");if(hs1)hs1.addEventListener("input",function(e){modalAreas[1].hygieneStaff=e.target.value.slice(0,100);});
 
   // Documents tab navigation
   var ddBtns=app.querySelectorAll("[data-docdate]");
@@ -1651,7 +1657,8 @@ function confirmLog(){
           name:FUJI_MICE_AREAS[i],
           pestActivity:a.pestActivity||"",
           correctiveAction:a.pestActivity==="Yes"?a.correctiveAction.trim():"N/A",
-          hygieneClean:a.pestActivity==="Yes"?(a.hygieneClean||"N/A"):"N/A"
+          hygieneClean:a.pestActivity==="Yes"?(a.hygieneClean||"N/A"):"N/A",
+          hygieneStaff:a.pestActivity==="Yes"?a.hygieneStaff.trim():"N/A"
         };
       });
     }
