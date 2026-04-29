@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Warehouse Checks</title>
-<style>@media print{body>*{display:none!important}#pdf-print-content{display:block!important}#pdf-nav-bar{display:none!important}}</style><style>
+<style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f1f5f9;color:#1e293b;-webkit-font-smoothing:antialiased}
   button{cursor:pointer;font-family:inherit;transition:opacity .15s}
@@ -16,6 +16,8 @@
   .scroll-x::-webkit-scrollbar{display:none}
   #app{max-width:430px;margin:0 auto;min-height:100vh;background:#f1f5f9}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -1235,171 +1237,174 @@ function buildDocumentPreview(ds, site, checkType){
 
 // ── Download Fuji Mice Form ───────────────────────────────────
 function downloadFujiMiceForm(ds){
+  if(!window.jspdf||!window.jspdf.jsPDF){
+    addToast("PDF library not loaded - check internet connection","warn",5000);
+    return;
+  }
+  addToast("Generating PDF...","ok",3000);
+
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
   var dateLabel=new Date(ds+"T12:00:00").toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",year:"numeric"});
+
+  var ML=10,MR=10,MT=10; // margins
+  var PW=297,PH=210;
+  var UW=PW-ML-MR; // 277mm usable width
+  // Column widths — must sum to UW (277)
+  var CW=[52,22,20,20,70,28,38,27]; // 277 total
 
   function getEntry(m){return checks[ckKey(ds,"Fuji","mice",m)]||null;}
 
-  function torchRow(val,action,type){
-    var yBold=val==="Pass"?"font-weight:bold":"";
-    var nBold=val==="Fail"?"font-weight:bold":"";
-    return '<tr><td colspan="8" style="border:1px solid #000;padding:4px 6px;font-size:8pt;background:#fef9c3">'
-      +'Torch check '+type+' use compliant with the requirements? '
-      +'<span style="'+yBold+'">Yes</span> / <span style="'+nBold+'">No</span>'
-      +(val?' &mdash; <strong>'+(val==="Pass"?"Yes":"No")+'</strong>':'')
-      +'<br>Corrective actions: '+(action||'')
-      +'</td></tr>';
-  }
+  function drawHeader(y,withIntro){
+    // Outer border box
+    doc.setDrawColor(0);doc.setLineWidth(0.5);
+    doc.rect(ML,y,UW,18);
+    // Logo divider line
+    doc.line(ML+22,y,ML+22,y+18);
+    // Logo
+    doc.addImage(TAIKO_LOGO,"JPEG",ML+2,y+1,16,16);
+    // Title
+    doc.setFontSize(12);doc.setFont("helvetica","bold");
+    doc.text("WAREHOUSE TWO HOURLY MICE DROPPING CHECK SHEET \u2013 FUJI BUILDING",
+      ML+22+(UW-22)/2, y+10, {align:"center",maxWidth:UW-24});
+    y+=20;
 
-  function areaRows(schedMin,entry){
-    var t=fmtMin(schedMin),out='';
-    for(var i=0;i<2;i++){
-      var name=FUJI_MICE_AREAS[i];
-      var pest='',ca='',staff='',actual='',hygiene='',hstaff='';
-      if(entry&&entry.areas&&entry.areas[i]){
-        var a=entry.areas[i];
-        pest=a.pestActivity||'';
-        ca=a.pestActivity==='Yes'?(a.correctiveAction||''):'N/A';
-        hygiene=a.pestActivity==='Yes'?(a.hygieneClean||'N/A'):'N/A';
-        hstaff=a.hygieneStaff&&a.hygieneStaff!=='N/A'?a.hygieneStaff:'N/A';
-        staff=entry.name||'';
-        actual=entry.loggedAt?new Date(entry.loggedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
-      }
-      out+='<tr>'
-        +'<td style="border:1px solid #000;padding:4px 5px;font-size:8pt;font-weight:bold">'+name+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:9pt;font-weight:bold;text-align:center">'+t+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt;text-align:center">'+actual+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt;text-align:center">'+pest+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt">'+ca+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt;text-align:center">'+staff+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt;text-align:center">'+hygiene+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt;text-align:center">'+hstaff+'</td>'
-        +'</tr>';
-    }
-    return out;
-  }
-
-  function tableHead(){
-    return '<thead><tr style="background:#e8e8e8">'
-      +'<th style="border:1px solid #000;padding:5px;font-size:8pt;width:19%">Area</th>'
-      +'<th style="border:1px solid #000;padding:5px;font-size:8pt;width:9%">Intended Time of Check:</th>'
-      +'<th style="border:1px solid #000;padding:5px;font-size:8pt;width:7%">Actual Time of Check:</th>'
-      +'<th style="border:1px solid #000;padding:5px;font-size:8pt;width:8%">Pest activity evidence (Yes/No)</th>'
-      +'<th style="border:1px solid #000;padding:5px;font-size:8pt;width:24%">Corrective Action</th>'
-      +'<th style="border:1px solid #000;padding:5px;font-size:8pt;width:11%">Staff Sign &amp; Number</th>'
-      +'<th style="border:1px solid #000;padding:5px;font-size:8pt;width:13%">Area Cleaned by Hygiene? (YES/NO/ N/A*)</th>'
-      +'<th style="border:1px solid #000;padding:5px;font-size:8pt;width:9%">Staff Sign &amp; Number</th>'
-      +'</tr></thead>';
-  }
-
-  function slotHTML(schedMin){
-    var e=getEntry(schedMin);
-    return '<table style="width:100%;border-collapse:collapse;margin-bottom:8px;table-layout:fixed">'
-      +tableHead()+'<tbody>'
-      +torchRow(e?e.torchBefore:null,e?e.torchBeforeAction:null,'before')
-      +areaRows(schedMin,e)
-      +torchRow(e?e.torchAfter:null,e?e.torchAfterAction:null,'after')
-      +'</tbody></table>';
-  }
-
-  function pageHeader(withIntro){
-    var h='<table style="width:100%;border-collapse:collapse;border:2px solid #000;margin-bottom:6px"><tr>'
-      +'<td style="width:75px;padding:6px;border-right:2px solid #000;vertical-align:middle;text-align:center">'
-      +'<img src="'+TAIKO_LOGO+'" style="width:55px;height:55px;object-fit:contain"/></td>'
-      +'<td style="text-align:center;padding:8px;vertical-align:middle">'
-      +'<strong style="font-size:13pt">WAREHOUSE TWO HOURLY MICE DROPPING CHECK SHEET &ndash; FUJI BUILDING</strong>'
-      +'</td></tr></table>';
     if(withIntro){
-      h+='<div style="font-size:7.5pt;line-height:1.4;margin-bottom:6px">'
-        +'<u>Mice dropping checks:</u> Koi Building &ndash; Chilled warehouse &amp; office room, Chilled Storage &amp; Ambient storage, must be checked for pest activity every day as per below list at specified times (refer to &ldquo;Intended Time of Check&rdquo;). Record actual time of the check +/- 15 minutes discrepancy is allowed between the intended time of check and actual time of check and recorded the time accordingly.<br>'
-        +'The following should be considered during inspections:<br>'
-        +'&nbsp;&nbsp;&nbsp;- LOOK &ndash; droppings, urine stains, footprints (e.g. on dust) and grease/smear marks, damage to property and/or stock, signs of chewing/gnawing, nests<br>'
-        +'&nbsp;&nbsp;&nbsp;- SMELL &ndash; foul or unusual odour<br>'
-        +'&nbsp;&nbsp;&nbsp;- LISTEN &ndash; unusual rustling noises<br>'
-        +'Corrective Actions - If pest Activity is evident, write yes below and inform QA/Technical Team immediately. Then inform hygiene to clean the area. Hygiene clean up must be done immediately after issue reported by the team. Follow up check must be carried out in the area where pest activity was evident after hygiene is done cleaning ensuring all is cleared. If area not cleaned are report to Hygiene Manager and QA Manager.<br>'
-        +'<u>Torch checks:</u> All torches used in storage, despatch, intake, and inspection areas must be visually checked before to confirm lens is intact, secure, and free from cracks or chips, no loose parts, exposed bulbs, or damaged casing, battery compartment is secure and fully enclosed, torch is clean and fit for use. If a torch is found damaged or not intact before use do not use the torch, report to area leader and remove immediately from the warehouse. If a torch is found damaged or not intact after use report to area leader and QA/Technical. Record results of the checks and any corrective actions. Torches must not be left on product, pallets, or food-contact surfaces.'
-        +'</div>';
+      var itext=[
+        {t:"Mice dropping checks:",bold:true,underline:true},
+        {t:"Koi Building \u2013 Chilled warehouse & office room, Chilled Storage & Ambient storage, must be checked for pest activity every day as per below list at specified times (refer to \u201cIntended Time of Check\u201d). Record actual time of the check +/- 15 minutes discrepancy is allowed between the intended time of check and actual time of check and recorded the time accordingly.",bold:false},
+        {t:"The following should be considered during inspections:",bold:false},
+        {t:"   - LOOK \u2013 droppings, urine stains, footprints (e.g. on dust) and grease/smear marks, damage to property and/or stock, signs of chewing/gnawing, nests",bold:false},
+        {t:"   - SMELL \u2013 foul or unusual odour",bold:false},
+        {t:"   - LISTEN \u2013 unusual rustling noises",bold:false},
+        {t:"Corrective Actions - If pest Activity is evident, write yes below and inform QA/Technical Team immediately. Then inform hygiene to clean the area. Hygiene clean up must be done immediately after issue reported by the team. Follow up check must be carried out in the area where pest activity was evident after hygiene is done cleaning ensuring all is cleared. If area not cleaned are report to Hygiene Manager and QA Manager.",bold:false},
+        {t:"Torch checks:",bold:true,underline:true},
+        {t:"All torches used in storage, despatch, intake, and inspection areas must be visually checked before to confirm lens is intact, secure, and free from cracks or chips, no loose parts, exposed bulbs, or damaged casing, battery compartment is secure and fully enclosed, torch is clean and fit for use. If a torch is found damaged or not intact before use do not use the torch, report to area leader and remove immediately from the warehouse. If a torch is found damaged or not intact after use report to area leader and QA/Technical. Record results of the checks and any corrective actions. Torches must not be left on product, pallets, or food-contact surfaces.",bold:false}
+      ];
+      doc.setFontSize(7);
+      for(var ii=0;ii<itext.length;ii++){
+        var item=itext[ii];
+        doc.setFont("helvetica",item.bold?"bold":"normal");
+        var lines=doc.splitTextToSize(item.t,UW);
+        doc.text(lines,ML,y);
+        if(item.underline){
+          var tw=doc.getTextWidth(item.t);
+          doc.setLineWidth(0.1);
+          doc.line(ML,y+0.5,ML+tw,y+0.5);
+        }
+        y+=lines.length*2.8;
+      }
+      y+=1;
     }
-    h+='<div style="font-size:11pt;font-weight:bold;margin:6px 0 8px">Date: '+dateLabel+'</div>';
-    return h;
+    // Date
+    doc.setFontSize(11);doc.setFont("helvetica","bold");
+    doc.text("Date: "+dateLabel,ML,y+5);
+    return y+10;
   }
 
-  function pageFooter(num){
-    return '<table style="width:100%;border-collapse:collapse;border:1px solid #000;margin-top:8px;font-size:8pt"><tr>'
-      +'<td style="border:1px solid #000;padding:4px;width:65px;text-align:center;vertical-align:middle">'
-      +'<img src="'+TAIKO_LOGO+'" style="width:38px;height:38px;object-fit:contain"/></td>'
-      +'<td style="border:1px solid #000;padding:4px;text-align:center">Doc ref<br><strong>4.14 QA135-01</strong></td>'
-      +'<td style="border:1px solid #000;padding:4px;text-align:center">Version<br><strong>5</strong></td>'
-      +'<td style="border:1px solid #000;padding:4px;text-align:center">Issue Date<br><strong>23/01/2026</strong></td>'
-      +'<td style="border:1px solid #000;padding:4px;text-align:center">Replaces Date<br><strong>21/08/2025</strong></td>'
-      +'<td style="border:1px solid #000;padding:4px;text-align:center">Issued by<br><strong>J. Szewczyk</strong></td>'
-      +'<td style="border:1px solid #000;padding:4px;text-align:center">Approved by<br><strong>P. Nathani</strong></td>'
-      +'<td style="border:1px solid #000;padding:4px;text-align:center">Page<br><strong>'+num+' of 5</strong></td>'
-      +'</tr>'
-      +'<tr><td colspan="8" style="border:1px solid #000;padding:3px;font-size:7.5pt"><strong>Reason for change:</strong> Added torch checks.</td></tr>'
-      +'</table>';
+  function buildSlotRows(schedMin){
+    var e=getEntry(schedMin);
+    var t=fmtMin(schedMin);
+    var tbPre=(e&&e.torchBefore)?"Torch check before use compliant with the requirements? Yes / No \u2014 "+(e.torchBefore==="Pass"?"Yes":"No"):"Torch check before use compliant with the requirements? Yes / No";
+    var tbAft=(e&&e.torchAfter)?"Torch check after use compliant with the requirements? Yes / No \u2014 "+(e.torchAfter==="Pass"?"Yes":"No"):"Torch check after use compliant with the requirements? Yes / No";
+    var caText=function(ca){return ca&&ca.length?"Corrective actions: "+ca:"Corrective actions: ";};
+    var rows=[];
+    var torchStyle={fillColor:[254,249,195],fontSize:8,cellPadding:2.5};
+    rows.push([{content:tbPre+"\n"+caText(e?e.torchBeforeAction:""),colSpan:8,styles:torchStyle}]);
+    for(var ai=0;ai<2;ai++){
+      var aname=FUJI_MICE_AREAS[ai];
+      var pest="",ca="N/A",staff="",actual="",hygiene="N/A",hstaff="N/A";
+      if(e&&e.areas&&e.areas[ai]){
+        var a=e.areas[ai];
+        pest=a.pestActivity||"";
+        ca=a.pestActivity==="Yes"?(a.correctiveAction||""):"N/A";
+        hygiene=a.pestActivity==="Yes"?(a.hygieneClean||"N/A"):"N/A";
+        hstaff=(a.hygieneStaff&&a.hygieneStaff!=="N/A")?a.hygieneStaff:"N/A";
+        staff=e.name||"";
+        actual=e.loggedAt?new Date(e.loggedAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
+      }
+      rows.push([{content:aname,styles:{fontStyle:"bold"}},''+t,actual,pest,ca,staff,hygiene,hstaff]);
+    }
+    rows.push([{content:tbAft+"\n"+caText(e?e.torchAfterAction:""),colSpan:8,styles:torchStyle}]);
+    return rows;
+  }
+
+  function drawSlot(schedMin,startY){
+    doc.autoTable({
+      startY:startY,
+      margin:{left:ML,right:MR},
+      tableWidth:UW,
+      theme:"grid",
+      styles:{fontSize:8,cellPadding:2.5,overflow:"linebreak",textColor:0,lineColor:0,lineWidth:0.25},
+      headStyles:{fillColor:[220,220,220],textColor:0,fontStyle:"bold",fontSize:8,halign:"center"},
+      columnStyles:{
+        0:{cellWidth:CW[0]},
+        1:{cellWidth:CW[1],halign:"center"},
+        2:{cellWidth:CW[2],halign:"center"},
+        3:{cellWidth:CW[3],halign:"center"},
+        4:{cellWidth:CW[4]},
+        5:{cellWidth:CW[5],halign:"center"},
+        6:{cellWidth:CW[6],halign:"center"},
+        7:{cellWidth:CW[7],halign:"center"}
+      },
+      head:[["Area","Intended\nTime of\nCheck:","Actual\nTime of\nCheck:","Pest activity\nevidence\n(Yes/No)","Corrective Action","Staff Sign &\nNumber","Area Cleaned by\nHygiene?\n(YES/NO/ N/A*)","Staff Sign &\nNumber"]],
+      body:buildSlotRows(schedMin)
+    });
+    return doc.lastAutoTable.finalY;
+  }
+
+  function drawFooter(pageNum){
+    var footerY=PH-MT-14;
+    doc.autoTable({
+      startY:footerY,
+      margin:{left:ML,right:MR},
+      tableWidth:UW,
+      theme:"grid",
+      styles:{fontSize:7.5,cellPadding:2,textColor:0,lineColor:0,lineWidth:0.25,halign:"center"},
+      columnStyles:{
+        0:{cellWidth:18},
+        1:{cellWidth:35},
+        2:{cellWidth:22},
+        3:{cellWidth:32},
+        4:{cellWidth:32},
+        5:{cellWidth:35},
+        6:{cellWidth:35},
+        7:{cellWidth:68}
+      },
+      body:[
+        [
+          {content:"",styles:{cellWidth:18}},
+          {content:"Doc ref\n4.14 QA135-01",styles:{fontStyle:"bold"}},
+          {content:"Version\n5",styles:{fontStyle:"bold"}},
+          {content:"Issue Date\n23/01/2026",styles:{fontStyle:"bold"}},
+          {content:"Replaces Date\n21/08/2025",styles:{fontStyle:"bold"}},
+          {content:"Issued by\nJ. Szewczyk",styles:{fontStyle:"bold"}},
+          {content:"Approved by\nP. Nathani",styles:{fontStyle:"bold"}},
+          {content:"Page\n"+pageNum+" of 5",styles:{fontStyle:"bold"}}
+        ],
+        [{content:"Reason for change: Added torch checks.",colSpan:8,styles:{halign:"left"}}]
+      ],
+      didDrawCell:function(data){
+        if(data.row.index===0&&data.column.index===0){
+          doc.addImage(TAIKO_LOGO,"JPEG",data.cell.x+1,data.cell.y+1,14,12);
+        }
+      }
+    });
   }
 
   var pageGroups=[[360],[480,600],[720,840],[960,1080],[1200,1320]];
-  var pagesHTML='';
   for(var pi=0;pi<pageGroups.length;pi++){
-    pagesHTML+='<div style="'+(pi>0?'page-break-before:always;':'')+'">'
-      +pageHeader(pi===0);
+    if(pi>0)doc.addPage();
+    var y=drawHeader(MT,pi===0);
     for(var si=0;si<pageGroups[pi].length;si++){
-      pagesHTML+=slotHTML(pageGroups[pi][si]);
+      if(si>0)y=doc.lastAutoTable.finalY+4;
+      y=drawSlot(pageGroups[pi][si],y);
     }
-    pagesHTML+=pageFooter(pi+1)+'</div>';
+    drawFooter(pi+1);
   }
 
-  var printHTML='<!DOCTYPE html><html><head><meta charset="UTF-8">'
-    +'<style>'
-    +'*{box-sizing:border-box}'
-    +'@page{size:A4 landscape;margin:10mm}'
-    +'body{margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;'
-    +'-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}'
-    +'</style></head><body>'+pagesHTML+'</body></html>';
-
-  // In-app preview with minimal non-printing header
-  var old=document.getElementById('pdf-print-content');
-  if(old)old.remove();
-
-  var wrap=document.createElement('div');
-  wrap.id='pdf-print-content';
-  wrap.style.cssText='display:none;position:fixed;inset:0;z-index:3000;background:#fff;overflow-y:auto';
-
-  var nav=document.createElement('div');
-  nav.id='pdf-nav-bar';
-  nav.style.cssText='background:#185FA5;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10';
-  nav.innerHTML='<button id="pdf-back-btn" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 14px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer">&#8592; Back to app</button>'
-    +'<button id="pdf-print-btn" style="background:#fff;color:#185FA5;border:none;padding:8px 14px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">Print / Save PDF</button>';
-
-  var preview=document.createElement('div');
-  preview.style.cssText='padding:12px;font-family:Arial,Helvetica,sans-serif;font-size:12px';
-  preview.innerHTML=pagesHTML;
-
-  wrap.appendChild(nav);
-  wrap.appendChild(preview);
-  document.body.appendChild(wrap);
-  wrap.style.display='block';
-
-  document.getElementById('pdf-back-btn').addEventListener('click',function(){wrap.remove();});
-
-  document.getElementById('pdf-print-btn').addEventListener('click',function(){
-    // Hidden iframe with its own @page CSS — only reliable way to force landscape on all devices
-    var ifr=document.createElement('iframe');
-    ifr.style.cssText='position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;opacity:0';
-    document.body.appendChild(ifr);
-    ifr.onload=function(){
-      setTimeout(function(){
-        ifr.contentWindow.focus();
-        ifr.contentWindow.print();
-        setTimeout(function(){ifr.remove();},2000);
-      },300);
-    };
-    var d=ifr.contentDocument||ifr.contentWindow.document;
-    d.open();d.write(printHTML);d.close();
-  });
+  doc.save("Fuji_Mice_Check_"+ds+".pdf");
 }
-
 
 // ── render ────────────────────────────────────────────────────
 function render(){
