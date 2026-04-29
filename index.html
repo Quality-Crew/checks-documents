@@ -892,12 +892,13 @@ function buildAssignModal(){
   return html;
 }
 
-function buildModal(){
+function buildModalContent(){
+  if(!modal)return"";
   if(!modal)return"";
   var site=modal.site,type=modal.type,schedMin=modal.schedMin,ds=modal.ds,c=SITE_CFG[site];
   var infoBar='<div style="font-size:13px;color:#64748b;background:#f8fafc;border-radius:10px;padding:9px 13px;margin-bottom:16px"><span style="color:'+c.color+';font-weight:600">'+site+'</span> &mdash; '+CHECK_CFG[type].label+' &mdash; '+fmtMin(schedMin)+'</div>';
-  var wrap='<div id="overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;overflow:hidden">'+
-    '<div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;box-sizing:border-box">'+
+  var wrap='';
+
     '<div style="width:38px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 18px"></div>';
   if(modal.mode==="edit"){
     var entry=checks[ckKey(ds,site,type,schedMin)];
@@ -972,7 +973,7 @@ function buildModal(){
     }
     // Add photo button + picker popup
     if(photoCount<photoRule.max){
-      wrap+='<label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1.5px dashed #cbd5e1;background:#f8fafc;color:#475569;font-size:13px;font-weight:600;cursor:pointer">Add photo<input type="file" id="photo-input" accept="image/*" style="display:none"/></label>';
+      wrap+='<label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1.5px dashed #cbd5e1;background:#f8fafc;color:#475569;font-size:13px;font-weight:600;cursor:pointer">Add photo<input type="file" id="photo-input" accept="image/*" multiple style="display:none"/></label>';
     }
     // Progress indicator during upload
     if(uploadingPhotos){
@@ -1002,8 +1003,21 @@ function buildModal(){
       '<button id="confirm-btn" '+((!photosMet||!fujiMiceMet||uploadingPhotos)?"disabled":"")+' style="flex:2;padding:13px;border-radius:10px;border:none;background:'+confirmBg+';color:#fff;font-size:15px;font-weight:600;opacity:'+((!photosMet||!fujiMiceMet||uploadingPhotos)?0.6:1)+'">'+(saving?"Saving...":(uploadingPhotos?"Uploading...":"Confirm"))+'</button>'+
     '</div>';
   }
+  return wrap;
+}
+
+
+function buildModal(){
+  if(!modal)return"";
+  if(!modal)return"";
+  var site=modal.site,type=modal.type,schedMin=modal.schedMin,ds=modal.ds,c=SITE_CFG[site];
+  var infoBar='<div style="font-size:13px;color:#64748b;background:#f8fafc;border-radius:10px;padding:9px 13px;margin-bottom:16px"><span style="color:'+c.color+';font-weight:600">'+site+'</span> &mdash; '+CHECK_CFG[type].label+' &mdash; '+fmtMin(schedMin)+'</div>';
+  var wrap='<div id="overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;overflow:hidden">'+
+    '<div id="modal-inner" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;box-sizing:border-box">';
+  wrap+=buildModalContent();
   return wrap+'</div></div>';
 }
+
 
 function buildPhotoPicker(){
   if(!photoPickerOpen) return "";
@@ -1086,6 +1100,17 @@ function buildFujiMiceFields(){
       html2+='<div style="margin-top:10px">';
       html2+='<label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px">Hygiene staff name <span style="font-weight:400;color:#94a3b8">(optional, max 100 chars)</span></label>';
       html2+='<input id="hygiene-staff-'+ai+'" type="text" maxlength="100" placeholder="Enter hygiene staff name..." value="'+ar.hygieneStaff.replace(/</g,"&lt;")+'" style="width:100%;padding:9px 11px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;background:#fff;outline:none;font-family:inherit;box-sizing:border-box"/>';
+      html2+='</div>';
+    } else if(ar.pestActivity==="No"){
+      html2+='<div style="margin-top:10px;display:flex;gap:10px">';
+      html2+='<div style="flex:1;background:#f1f5f9;border-radius:8px;padding:9px 12px">';
+      html2+='<div style="font-size:11px;color:#94a3b8;margin-bottom:2px">Corrective action</div>';
+      html2+='<div style="font-size:13px;font-weight:600;color:#64748b">N/A</div>';
+      html2+='</div>';
+      html2+='<div style="flex:1;background:#f1f5f9;border-radius:8px;padding:9px 12px">';
+      html2+='<div style="font-size:11px;color:#94a3b8;margin-bottom:2px">Hygiene staff name</div>';
+      html2+='<div style="font-size:13px;font-weight:600;color:#64748b">N/A</div>';
+      html2+='</div>';
       html2+='</div>';
     }
     html2+='</div>';
@@ -1303,10 +1328,10 @@ function _generatePDF(ds){
       txt(actual,CX.actualTime,ry,"center");
       if(a){
         txt(a.pestActivity||"",CX.pest,ry,"center");
-        if(a.pestActivity==="Yes")txt(a.correctiveAction||"",CX.ca,ry,"left",65);
+        txt(a.pestActivity==="Yes"?(a.correctiveAction||""):"N/A",159,ry,"center",65);
         txt(e.name||"",CX.staff,ry,"center",22);
         txt(a.hygieneClean||"N/A",CX.hygiene,ry,"center",20);
-        if(a.hygieneStaff&&a.hygieneStaff!=="N/A")txt(a.hygieneStaff,CX.hygieneStaff,ry,"center",18);
+        txt(a.pestActivity==="Yes"?(a.hygieneStaff&&a.hygieneStaff!=="N/A"?a.hygieneStaff:"N/A"):"N/A",CX.hygieneStaff,ry,"center",18);
       }
     }
 
@@ -1352,8 +1377,17 @@ function _generatePDF(ds){
     }
   }
 
-  doc.save("Fuji_Mice_Check_"+ds+".pdf");
+  var fileName="Fuji_Mice_Check_"+ds+".pdf";
+  var pdfBlob=doc.output("blob");
   var old=document.getElementById("pdf-preview-overlay");if(old)old.remove();
+  // Use Web Share API on mobile (shows native share sheet)
+  if(navigator.canShare&&navigator.canShare({files:[new File([pdfBlob],fileName,{type:"application/pdf"})]})){
+    var file=new File([pdfBlob],fileName,{type:"application/pdf"});
+    navigator.share({files:[file],title:"Fuji Mice Check",text:fileName}).catch(function(){});
+  } else {
+    // Fallback: direct download for desktop
+    doc.save(fileName);
+  }
 }
 
 function downloadFujiMiceForm(ds){
@@ -1409,10 +1443,10 @@ function downloadFujiMiceForm(ds){
       html2+=span(actual,CX.actualTime,ry,"center");
       if(a){
         html2+=span(a.pestActivity||"",CX.pest,ry,"center");
-        if(a.pestActivity==="Yes")html2+=span(a.correctiveAction||"",CX.ca,ry,"left",65);
+        html2+=span(a.pestActivity==="Yes"?(a.correctiveAction||""):"N/A",159,ry,"center",65);
         html2+=span(e.name||"",CX.staff,ry,"center",22);
         html2+=span(a.hygieneClean||"N/A",CX.hygiene,ry,"center",20);
-        if(a.hygieneStaff&&a.hygieneStaff!=="N/A")html2+=span(a.hygieneStaff,CX.hygieneStaff,ry,"center",18);
+        html2+=span(a.pestActivity==="Yes"?(a.hygieneStaff&&a.hygieneStaff!=="N/A"?a.hygieneStaff:"N/A"):"N/A",CX.hygieneStaff,ry,"center",18);
       }
     }
     html2+=torchSpan(e.torchAfter,layout.taY,"after");
@@ -1472,8 +1506,48 @@ function downloadFujiMiceForm(ds){
   });
 }
 
+
+
+// ── attachModalInnerListeners ─────────────────────────────────
+function attachModalInnerListeners(container){
+  var root=container||document;
+  var tbBtns=root.querySelectorAll("[data-torchbefore]");
+  for(var i=0;i<tbBtns.length;i++){(function(el){el.addEventListener("click",function(e){e.stopPropagation();modalTorchBefore=el.dataset.torchbefore;var tba=root.querySelector("#tba-text");if(tba)modalTorchBeforeAction=tba.value;renderModalOnly();});})(tbBtns[i]);}
+  var taBtns=root.querySelectorAll("[data-torchafter]");
+  for(var i=0;i<taBtns.length;i++){(function(el){el.addEventListener("click",function(e){e.stopPropagation();modalTorchAfter=el.dataset.torchafter;var taa=root.querySelector("#taa-text");if(taa)modalTorchAfterAction=taa.value;renderModalOnly();});})(taBtns[i]);}
+  var paBtns=root.querySelectorAll("[data-pestact]");
+  for(var i=0;i<paBtns.length;i++){(function(el){el.addEventListener("click",function(e){e.stopPropagation();var parts=el.dataset.pestact.split("|");var idx=parseInt(parts[0]),val=parts[1];var ca=root.querySelector("#area-ca-"+idx);if(ca)modalAreas[idx].correctiveAction=ca.value;modalAreas[idx].pestActivity=val;if(val==="No"){modalAreas[idx].hygieneClean="N/A";modalAreas[idx].hygieneStaff="";}renderModalOnly();});})(paBtns[i]);}
+  var hcBtns=root.querySelectorAll("[data-hygiene]");
+  for(var i=0;i<hcBtns.length;i++){(function(el){el.addEventListener("click",function(e){e.stopPropagation();var parts=el.dataset.hygiene.split("|");var idx=parseInt(parts[0]),val=parts[1];modalAreas[idx].hygieneClean=val;renderModalOnly();});})(hcBtns[i]);}
+  var tbaT=root.querySelector("#tba-text");if(tbaT)tbaT.addEventListener("input",function(e){modalTorchBeforeAction=e.target.value.slice(0,200);});
+  var taaT=root.querySelector("#taa-text");if(taaT)taaT.addEventListener("input",function(e){modalTorchAfterAction=e.target.value.slice(0,200);});
+  var ca0=root.querySelector("#area-ca-0");if(ca0)ca0.addEventListener("input",function(e){modalAreas[0].correctiveAction=e.target.value.slice(0,200);});
+  var ca1=root.querySelector("#area-ca-1");if(ca1)ca1.addEventListener("input",function(e){modalAreas[1].correctiveAction=e.target.value.slice(0,200);});
+  var hs0=root.querySelector("#hygiene-staff-0");if(hs0)hs0.addEventListener("input",function(e){modalAreas[0].hygieneStaff=e.target.value.slice(0,100);});
+  var hs1=root.querySelector("#hygiene-staff-1");if(hs1)hs1.addEventListener("input",function(e){modalAreas[1].hygieneStaff=e.target.value.slice(0,100);});
+}
+
+// ── renderModalOnly ──────────────────────────────────────────
+// Rebuilds only the modal inner content — does NOT touch app.innerHTML
+// This means modal-inner stays in the DOM and scrollTop is preserved perfectly
+function renderModalOnly(){
+  var el=document.getElementById("modal-inner");
+  if(!el||!modal){render();return;}
+  var savedScroll=el.scrollTop;
+  // Rebuild only the inner content (everything inside modal-inner)
+  el.innerHTML=buildModalContent();
+  // Synchronous restore — element stayed in DOM so scrollTop works immediately
+  el.scrollTop=savedScroll;
+  // Re-attach all inner modal listeners
+  attachModalInnerListeners(el);
+}
+
 // ── render ────────────────────────────────────────────────────
 function render(){
+  // Save modal inner scroll position before re-render
+  var _overlayScroll=0;
+  var _overlayEl=document.getElementById("modal-inner");
+  if(_overlayEl){_overlayScroll=_overlayEl.scrollTop;}
   var app=document.getElementById("app");if(!app)return;
   if(regScreen){
     app.innerHTML=buildRegScreen();
@@ -1574,13 +1648,24 @@ function render(){
     photoInput.addEventListener("change",function(e){
       var files=e.target.files;
       if(!files||!files.length)return;
-      var file=files[0];
       var photoRule=PHOTO_RULES[modal?modal.type:""]||{max:3};
-      if(modalPhotos.length>=photoRule.max){addToast("Maximum "+photoRule.max+" photos allowed","warn",3000);return;}
-      compressAndStage(file,function(staged){
-        modalPhotos.push(staged);
-        render();
-      });
+      var remaining=photoRule.max-modalPhotos.length;
+      if(remaining<=0){addToast("Maximum "+photoRule.max+" photos allowed","warn",3000);return;}
+      // Process up to `remaining` files
+      var toProcess=Math.min(files.length,remaining);
+      var done=0;
+      for(var fi=0;fi<toProcess;fi++){
+        (function(file){
+          compressAndStage(file,function(staged){
+            modalPhotos.push(staged);
+            done++;
+            if(done===toProcess)render();
+          });
+        })(files[fi]);
+      }
+      if(files.length>remaining){
+        addToast("Only "+remaining+" more photo"+(remaining>1?"s":"")+" allowed — added "+remaining,"warn",4000);
+      }
       e.target.value="";
     });
   }
@@ -1654,6 +1739,17 @@ function render(){
   // Documents tab navigation
   // doc navigation handled via inline onclick
 
+
+  // Restore modal inner scroll position after re-render
+  if(_overlayScroll>0){
+    var _scrollTarget=_overlayScroll;
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        var _el=document.getElementById("modal-inner");
+        if(_el)_el.scrollTop=_scrollTarget;
+      });
+    });
+  }
 
   // Restore tab bar scroll position
   var newScrollX=app.querySelector(".scroll-x");
