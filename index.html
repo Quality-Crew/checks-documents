@@ -1113,12 +1113,12 @@ function buildDocuments(){
 
   if(docDate&&docSite){
     // Show check types for this site
-    html2+='<button id="doc-back-site" style="margin-bottom:14px;background:none;border:none;font-size:14px;color:#185FA5;font-weight:600;padding:0;cursor:pointer">&#8592; Back</button>';
+    html2+='<button onclick="docSite=null;docCheck=null;render();window.scrollTo({top:0,behavior:\'smooth\'})" style="margin-bottom:14px;background:none;border:none;font-size:14px;color:#185FA5;font-weight:600;padding:0;cursor:pointer">&#8592; Back</button>';
     html2+='<div style="font-weight:700;font-size:17px;color:#1e293b;margin-bottom:4px">'+docSite+' Documents</div>';
     html2+='<div style="font-size:12px;color:#64748b;margin-bottom:16px">'+new Date(docDate+"T12:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+'</div>';
     // Only Fuji mice for now
     if(docSite==="Fuji"){
-      html2+='<button data-doccheck="mice" style="width:100%;text-align:left;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">';
+      html2+='<button onclick="docCheck=\'mice\';render();window.scrollTo({top:0,behavior:\'smooth\'})" style="width:100%;text-align:left;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">';
       html2+='<div><div style="font-weight:600;font-size:15px;color:#1e293b">Mice Dropping Check Sheet</div><div style="font-size:12px;color:#64748b;margin-top:2px">Doc ref: 4.14 QA135-01 &nbsp;&middot;&nbsp; Fuji Building</div></div>';
       html2+='<span style="color:#185FA5;font-size:18px">&#8250;</span>';
       html2+='</button>';
@@ -1130,13 +1130,13 @@ function buildDocuments(){
 
   if(docDate){
     // Show site cards
-    html2+='<button id="doc-back-dates" style="margin-bottom:14px;background:none;border:none;font-size:14px;color:#185FA5;font-weight:600;padding:0;cursor:pointer">&#8592; Back</button>';
+    html2+='<button onclick="docDate=null;docSite=null;docCheck=null;render();window.scrollTo({top:0,behavior:\'smooth\'})" style="margin-bottom:14px;background:none;border:none;font-size:14px;color:#185FA5;font-weight:600;padding:0;cursor:pointer">&#8592; Back</button>';
     html2+='<div style="font-weight:700;font-size:17px;color:#1e293b;margin-bottom:4px">Select Site</div>';
     html2+='<div style="font-size:12px;color:#64748b;margin-bottom:16px">'+new Date(docDate+"T12:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+'</div>';
     html2+='<div style="display:flex;flex-direction:column;gap:10px">';
     for(var si=0;si<SITES.length;si++){
       var s=SITES[si],sc=SITE_CFG[s];
-      html2+='<button data-docsite="'+s+'" style="text-align:left;background:#fff;border:2px solid '+sc.color+';border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">';
+      html2+='<button onclick="docSite=\''+s+'\';docCheck=null;render();window.scrollTo({top:0,behavior:\'smooth\'})" style="text-align:left;background:#fff;border:2px solid '+sc.color+';border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">';
       html2+='<div style="font-weight:600;font-size:15px;color:'+sc.color+'">'+s+'</div>';
       html2+='<span style="color:'+sc.color+';font-size:18px">&#8250;</span>';
       html2+='</button>';
@@ -1156,7 +1156,7 @@ function buildDocuments(){
     var ds=dstr(d);
     var isToday=(di===0);
     var label=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-    html2+='<button data-docdate="'+ds+'" style="text-align:left;background:#fff;border:1px solid '+(isToday?"#185FA5":"#e2e8f0")+';border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">';
+    html2+='<button onclick="docDate=\''+ds+'\';docSite=null;docCheck=null;render();window.scrollTo({top:0,behavior:\'smooth\'})" style="text-align:left;background:#fff;border:1px solid '+(isToday?"#185FA5":"#e2e8f0")+';border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">';
     html2+='<div>';
     html2+='<div style="font-weight:'+(isToday?"700":"600")+';font-size:14px;color:'+(isToday?"#185FA5":"#1e293b")+'">'+(isToday?"Today — ":"")+label+'</div>';
     html2+='</div>';
@@ -1170,14 +1170,14 @@ function buildDocuments(){
 // ── Document Preview ──────────────────────────────────────────
 function buildDocumentPreview(ds, site, checkType){
   var html2='';
-  html2+='<button id="doc-back-check" style="margin-bottom:14px;background:none;border:none;font-size:14px;color:#185FA5;font-weight:600;padding:0;cursor:pointer">&#8592; Back</button>';
+  html2+='<button onclick="docCheck=null;render();window.scrollTo({top:0,behavior:\'smooth\'})" style="margin-bottom:14px;background:none;border:none;font-size:14px;color:#185FA5;font-weight:600;padding:0;cursor:pointer">&#8592; Back</button>';
 
   var dateLabel=new Date(ds+"T12:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   html2+='<div style="font-weight:700;font-size:17px;color:#1e293b;margin-bottom:2px">Mice Dropping Check Sheet</div>';
   html2+='<div style="font-size:12px;color:#64748b;margin-bottom:16px">Fuji Building &nbsp;&middot;&nbsp; '+dateLabel+'</div>';
 
   // Download button
-  html2+='<button id="doc-download" style="width:100%;padding:13px;border-radius:10px;border:none;background:#185FA5;color:#fff;font-size:15px;font-weight:600;margin-bottom:16px;cursor:pointer">Download PDF</button>';
+  html2+='<button onclick="downloadFujiMiceForm(\''+ds+'\')" style="width:100%;padding:13px;border-radius:10px;border:none;background:#185FA5;color:#fff;font-size:15px;font-weight:600;margin-bottom:16px;cursor:pointer">Download PDF</button>';
 
   // Live preview — build the session tables
   var miceSchedule=[360,480,600,720,840,960,1080,1200,1320]; // 6am-10pm even hours
@@ -1237,149 +1237,173 @@ function buildDocumentPreview(ds, site, checkType){
 function downloadFujiMiceForm(ds){
   var dateLabel=new Date(ds+"T12:00:00").toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",year:"numeric"});
   var miceSchedule=[360,480,600,720,840,960,1080,1200,1320];
-
-  // Build the page groups: [6am], [8am,10am], [12pm,2pm], [4pm,6pm], [8pm,10pm]
   var pageGroups=[[360],[480,600],[720,840],[960,1080],[1200,1320]];
 
-  var introHTML='<div style="font-size:8.5pt;line-height:1.4;margin-bottom:8px"><u>Mice dropping checks:</u><br>Koi Building – Chilled warehouse &amp; office room, Chilled Storage &amp; Ambient storage, must be checked for pest activity every day as per below list at specified times (refer to "Intended Time of Check"). Record actual time of the check +/- 15 minutes discrepancy is allowed between the intended time of check and actual time of check and recorded the time accordingly.<br>The following should be considered during inspections:<br>&nbsp;&nbsp;&nbsp;- LOOK – droppings, urine stains, footprints (e.g. on dust) and grease/smear marks, damage to property and/or stock, signs of chewing/gnawing, nests<br>&nbsp;&nbsp;&nbsp;- SMELL – foul or unusual odour<br>&nbsp;&nbsp;&nbsp;- LISTEN – unusual rustling noises<br>Corrective Actions - If pest Activity is evident, write yes below and inform QA/Technical Team immediately. Then inform hygiene to clean the area. Hygiene clean up must be done immediately after issue reported by the team. Follow up check must be carried out in the area where pest activity was evident after hygiene is done cleaning ensuring all is cleared. If area not cleaned are report to Hygiene Manager and QA Manager.<br><u>Torch checks:</u><br>All torches used in storage, despatch, intake, and inspection areas must be visually checked before to confirm lens is intact, secure, and free from cracks or chips, no loose parts, exposed bulbs, or damaged casing, battery compartment is secure and fully enclosed, torch is clean and fit for use. If a torch is found damaged or not intact before use do not use the torch, report to area leader and remove immediately from the warehouse. If a torch is found damaged or not intact after use report to area leader and QA/Technical. Record results of the checks and any corrective actions. Torches must not be left on product, pallets, or food-contact surfaces.</div>';
+  function fmtT(m){return fmtMin(m);}
+  function getEntry(schedMin){return checks[ckKey(ds,"Fuji","mice",schedMin)]||null;}
 
-  var docFooter='<table style="width:100%;border-collapse:collapse;margin-top:auto;font-size:7.5pt;border:1px solid #000">'
-    +'<tr>'
-    +'<td style="border:1px solid #000;padding:3px;width:60px;text-align:center;vertical-align:middle">'
-    +'<img src="'+TAIKO_LOGO+'" style="width:40px;height:40px;object-fit:contain"/>'
-    +'</td>'
-    +'<td style="border:1px solid #000;padding:3px;text-align:center">Doc ref<br><strong>4.14 QA135-01</strong></td>'
-    +'<td style="border:1px solid #000;padding:3px;text-align:center">Version<br><strong>5</strong></td>'
-    +'<td style="border:1px solid #000;padding:3px;text-align:center">Issue Date<br><strong>23/01/2026</strong></td>'
-    +'<td style="border:1px solid #000;padding:3px;text-align:center">Replaces Date<br><strong>21/08/2025</strong></td>'
-    +'<td style="border:1px solid #000;padding:3px;text-align:center">Issued by<br><strong>J. Szewczyk</strong></td>'
-    +'<td style="border:1px solid #000;padding:3px;text-align:center">Approved by<br><strong>P. Nathani</strong></td>'
-    +'<td style="border:1px solid #000;padding:3px;text-align:center">Page<br><strong>PAGE_NUM of 5</strong></td>'
-    +'</tr>'
-    +'<tr><td colspan="8" style="border:1px solid #000;padding:3px;font-size:7.5pt"><strong>Reason for change:</strong> Added torch checks.</td></tr>'
-    +'</table>';
-
-  function tableHeader(){
-    return '<table style="width:100%;border-collapse:collapse;font-size:8pt">'
-      +'<tr style="background:#fff">'
-      +'<th style="border:1px solid #000;padding:4px;width:18%">Area</th>'
-      +'<th style="border:1px solid #000;padding:4px;width:9%">Intended Time of Check</th>'
-      +'<th style="border:1px solid #000;padding:4px;width:9%">Actual Time of Check</th>'
-      +'<th style="border:1px solid #000;padding:4px;width:8%">Pest activity evidence (Yes/No)</th>'
-      +'<th style="border:1px solid #000;padding:4px;width:22%">Corrective Action</th>'
-      +'<th style="border:1px solid #000;padding:4px;width:10%">Staff Sign &amp; Number</th>'
-      +'<th style="border:1px solid #000;padding:4px;width:14%">Area Cleaned by Hygiene? (YES/NO/ N/A*)</th>'
-      +'<th style="border:1px solid #000;padding:4px;width:10%">Staff Sign &amp; Number</th>'
-      +'</tr>';
-  }
-
-  function torchRow(torchVal, torchAction, type){
+  function torchRowHTML(torchVal,torchAction,type){
     var display=torchVal?(torchVal==="Pass"?"Yes":"No"):"";
-    var yStyle=torchVal==="Pass"?"font-weight:bold":"";
-    var nStyle=torchVal==="Fail"?"font-weight:bold":"";
-    return '<tr style="background:#fef9c3"><td colspan="8" style="border:1px solid #000;padding:4px;font-size:8pt">'
+    return '<tr style="background:#fef9c3"><td colspan="8" style="border:1px solid #000;padding:4px;font-size:7.5pt">'
       +'Torch check '+type+' use compliant with the requirements? '
-      +'<span style="'+yStyle+'">Yes</span> / <span style="'+nStyle+'">No</span>'
-      +(torchVal?(' — <strong>'+display+'</strong>'):'')
+      +'<span style="'+(torchVal==="Pass"?"font-weight:bold":"")+'">Yes</span> / '
+      +'<span style="'+(torchVal==="Fail"?"font-weight:bold":"")+'">No</span>'
+      +(display?' — <strong>'+display+'</strong>':'')
       +'<br>Corrective actions: '+(torchAction||"")
       +'</td></tr>';
   }
 
-  function areaRows(schedMin, entry){
-    var areas=FUJI_MICE_AREAS;
-    var intendedTime=fmtMin(schedMin);
-    var rows="";
+  function areaRowsHTML(schedMin,entry){
+    var intendedTime=fmtT(schedMin);
+    var out="";
     for(var ai=0;ai<2;ai++){
-      var aName=areas[ai];
-      var pest="", ca="", hygiene="", staffName="", actualTime="";
+      var aName=FUJI_MICE_AREAS[ai];
+      var pest="",ca="",hygiene="",staff="",actualTime="",hygieneStaff="";
       if(entry&&entry.areas&&entry.areas[ai]){
         var ar=entry.areas[ai];
         pest=ar.pestActivity||"";
         ca=ar.pestActivity==="Yes"?(ar.correctiveAction||""):"N/A";
         hygiene=ar.hygieneClean||"N/A";
-        staffName=entry.name||"";
+        staff=entry.name||"";
         actualTime=entry.loggedAt?new Date(entry.loggedAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
+        hygieneStaff=ar.hygieneStaff&&ar.hygieneStaff!=="N/A"?ar.hygieneStaff:"N/A";
       }
-      rows+='<tr>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt">'+aName+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt;text-align:center">'+intendedTime+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt;text-align:center">'+actualTime+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt;text-align:center">'+pest+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt">'+ca+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt">'+staffName+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt;text-align:center">'+hygiene+'</td>'
-        +'<td style="border:1px solid #000;padding:4px;font-size:8pt">'+(ar.hygieneStaff&&ar.hygieneStaff!=="N/A"?ar.hygieneStaff:"N/A")+'</td>'
+      out+='<tr>'
+        +'<td style="border:1px solid #000;padding:3px;font-size:7.5pt">'+aName+'</td>'
+        +'<td style="border:1px solid #000;padding:3px;font-size:7.5pt;text-align:center">'+intendedTime+'</td>'
+        +'<td style="border:1px solid #000;padding:3px;font-size:7.5pt;text-align:center">'+actualTime+'</td>'
+        +'<td style="border:1px solid #000;padding:3px;font-size:7.5pt;text-align:center">'+pest+'</td>'
+        +'<td style="border:1px solid #000;padding:3px;font-size:7.5pt">'+ca+'</td>'
+        +'<td style="border:1px solid #000;padding:3px;font-size:7.5pt">'+staff+'</td>'
+        +'<td style="border:1px solid #000;padding:3px;font-size:7.5pt;text-align:center">'+hygiene+'</td>'
+        +'<td style="border:1px solid #000;padding:3px;font-size:7.5pt">'+hygieneStaff+'</td>'
         +'</tr>';
     }
-    return rows;
+    return out;
   }
 
-  function buildPageContent(pageNum, timeMins, includeIntro){
-    var entry0=checks[ckKey(ds,"Fuji","mice",timeMins[0])]||null;
-    var html3='';
-    // Header
-    html3+='<div style="display:flex;align-items:center;border:2px solid #000;margin-bottom:4px">'
-      +'<div style="padding:6px;border-right:2px solid #000"><img src="'+TAIKO_LOGO+'" style="width:55px;height:55px;object-fit:contain"/></div>'
-      +'<div style="flex:1;text-align:center;padding:8px"><strong style="font-size:13pt">WAREHOUSE TWO HOURLY MICE DROPPING CHECK SHEET – FUJI BUILDING</strong></div>'
-      +'</div>';
-    if(includeIntro)html3+=introHTML;
-    html3+='<div style="font-size:10pt;font-weight:bold;margin:6px 0">Date: '+dateLabel+'</div>';
-    // First time slot
-    html3+=tableHeader();
-    html3+=torchRow(entry0?entry0.torchBefore:null, entry0?entry0.torchBeforeAction:"","before");
-    html3+=areaRows(timeMins[0],entry0);
-    html3+=torchRow(entry0?entry0.torchAfter:null, entry0?entry0.torchAfterAction:"","after");
-    html3+='</table>';
-    // Second time slot (if any)
-    if(timeMins.length>1){
-      var entry1=checks[ckKey(ds,"Fuji","mice",timeMins[1])]||null;
-      html3+='<div style="margin-top:8px"></div>';
-      html3+=tableHeader();
-      html3+=torchRow(entry1?entry1.torchBefore:null, entry1?entry1.torchBeforeAction:"","before");
-      html3+=areaRows(timeMins[1],entry1);
-      html3+=torchRow(entry1?entry1.torchAfter:null, entry1?entry1.torchAfterAction:"","after");
-      html3+='</table>';
+  function thRow(){
+    return '<tr>'
+      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:18%">Area</th>'
+      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:8%">Intended Time</th>'
+      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:8%">Actual Time</th>'
+      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:8%">Pest Activity (Yes/No)</th>'
+      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:22%">Corrective Action</th>'
+      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:10%">Staff Sign & Number</th>'
+      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:14%">Area Cleaned by Hygiene? (YES/NO/N/A)</th>'
+      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:10%">Staff Sign & Number</th>'
+      +'</tr>';
+  }
+
+  function footerHTML(pageNum){
+    return '<table style="width:100%;border-collapse:collapse;font-size:7pt;border:1px solid #000;margin-top:8px">'
+      +'<tr>'
+      +'<td style="border:1px solid #000;padding:3px;width:50px;text-align:center"><img src="'+TAIKO_LOGO+'" style="width:36px;height:36px;object-fit:contain"/></td>'
+      +'<td style="border:1px solid #000;padding:3px;text-align:center">Doc ref<br><strong>4.14 QA135-01</strong></td>'
+      +'<td style="border:1px solid #000;padding:3px;text-align:center">Version<br><strong>5</strong></td>'
+      +'<td style="border:1px solid #000;padding:3px;text-align:center">Issue Date<br><strong>23/01/2026</strong></td>'
+      +'<td style="border:1px solid #000;padding:3px;text-align:center">Replaces<br><strong>21/08/2025</strong></td>'
+      +'<td style="border:1px solid #000;padding:3px;text-align:center">Issued by<br><strong>J. Szewczyk</strong></td>'
+      +'<td style="border:1px solid #000;padding:3px;text-align:center">Approved by<br><strong>P. Nathani</strong></td>'
+      +'<td style="border:1px solid #000;padding:3px;text-align:center">Page<br><strong>'+pageNum+' of 5</strong></td>'
+      +'</tr>'
+      +'<tr><td colspan="8" style="border:1px solid #000;padding:3px"><strong>Reason for change:</strong> Added torch checks.</td></tr>'
+      +'</table>';
+  }
+
+  function buildSlotHTML(schedMin){
+    var entry=getEntry(schedMin);
+    return '<table style="width:100%;border-collapse:collapse;margin-bottom:6px"><thead>'+thRow()+'</thead><tbody>'
+      +torchRowHTML(entry?entry.torchBefore:null,entry?entry.torchBeforeAction:"","before")
+      +areaRowsHTML(schedMin,entry)
+      +torchRowHTML(entry?entry.torchAfter:null,entry?entry.torchAfterAction:"","after")
+      +'</tbody></table>';
+  }
+
+  var introText='<div style="font-size:7.5pt;line-height:1.35;margin-bottom:6px">'
+    +'<u>Mice dropping checks:</u> Checks must be carried out at specified times. Record actual time +/- 15 minutes. '
+    +'LOOK for droppings, urine stains, footprints, grease marks, chewing, nests. SMELL for foul odours. LISTEN for rustling noises. '
+    +'If pest activity found, inform QA/Technical Team immediately and inform hygiene to clean the area.<br>'
+    +'<u>Torch checks:</u> All torches must be visually checked before and after use. Confirm lens intact, no loose parts, battery compartment secure. '
+    +'If damaged, remove immediately and report to area leader.</div>';
+
+  var headerHTML='<div style="display:flex;align-items:center;border:2px solid #000;margin-bottom:4px">'
+    +'<div style="padding:4px;border-right:2px solid #000"><img src="'+TAIKO_LOGO+'" style="width:50px;height:50px;object-fit:contain"/></div>'
+    +'<div style="flex:1;text-align:center;padding:6px"><strong style="font-size:11pt">WAREHOUSE TWO HOURLY MICE DROPPING CHECK SHEET – FUJI BUILDING</strong></div>'
+    +'</div>';
+
+  var dateBlock='<div style="font-size:10pt;font-weight:bold;margin:4px 0">Date: '+dateLabel+'</div>';
+
+  // Build all 5 pages
+  var pages=[
+    {num:1,slots:[360],intro:true},
+    {num:2,slots:[480,600],intro:false},
+    {num:3,slots:[720,840],intro:false},
+    {num:4,slots:[960,1080],intro:false},
+    {num:5,slots:[1200,1320],intro:false}
+  ];
+
+  var allPagesHTML="";
+  for(var pi=0;pi<pages.length;pi++){
+    var pg=pages[pi];
+    var pageHTML='<div style="width:100%;box-sizing:border-box;padding:8mm;'+(pi>0?'page-break-before:always;':'')+'font-family:Arial,Helvetica,sans-serif">';
+    pageHTML+=headerHTML;
+    if(pg.intro)pageHTML+=introText;
+    pageHTML+=dateBlock;
+    for(var si=0;si<pg.slots.length;si++){
+      pageHTML+=buildSlotHTML(pg.slots[si]);
     }
-    // Footer
-    html3+=docFooter.replace("PAGE_NUM",pageNum);
-    return html3;
+    pageHTML+=footerHTML(pg.num);
+    pageHTML+='</div>';
+    allPagesHTML+=pageHTML;
   }
 
-  var pagesHTML="";
-  for(var pi=0;pi<pageGroups.length;pi++){
-    pagesHTML+='<div style="width:210mm;min-height:297mm;padding:12mm;box-sizing:border-box;display:flex;flex-direction:column;'+(pi>0?"page-break-before:always;":"")+'">'+buildPageContent(pi+1,pageGroups[pi],pi===0)+'</div>';
-  }
-
-  var fullHTML='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fuji Mice Check - '+dateLabel+'</title>'
-    +'<style>@page{size:A4;margin:0}body{margin:0;font-family:Arial,Helvetica,sans-serif}@media print{.no-print{display:none}}</style>'
-    +'</head><body>'
-    +'<div class="no-print" style="position:fixed;top:0;left:0;right:0;background:#185FA5;color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;z-index:999">'
-    +'<span style="font-weight:600">Fuji Mice Dropping Check Sheet — '+dateLabel+'</span>'
-    +'<button onclick="window.print()" style="background:#fff;color:#185FA5;border:none;padding:8px 18px;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer">Print / Save PDF</button>'
+  // Build final HTML doc
+  var fullDoc='<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    +'<style>*{box-sizing:border-box}@page{size:A4;margin:0}body{margin:0;font-family:Arial,Helvetica,sans-serif}'
+    +'@media print{.no-print{display:none!important}}</style>'
+    +'<title>Fuji Mice Check '+dateLabel+'</title></head><body>'
+    +'<div class="no-print" style="position:sticky;top:0;background:#185FA5;color:#fff;'
+    +'padding:10px 16px;display:flex;justify-content:space-between;align-items:center;z-index:999">'
+    +'<button onclick="document.getElementById(\'pdf-overlay\').remove()" '
+    +'style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 14px;'
+    +'border-radius:6px;font-size:14px;font-weight:600;cursor:pointer">Back to app</button>'
+    +'<button onclick="window.print()" '
+    +'style="background:#fff;color:#185FA5;border:none;padding:8px 14px;'
+    +'border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">Print / Save PDF</button>'
     +'</div>'
-    +'<div style="margin-top:50px">'+pagesHTML+'</div>'
+    +'<div style="padding:0">'+allPagesHTML+'</div>'
     +'</body></html>';
 
-  try{
-    addToast("Opening PDF — allow popups if prompted","ok",4000);
-    var blob=new Blob([fullHTML],{type:"text/html"});
-    var blobUrl=URL.createObjectURL(blob);
-    var win=window.open(blobUrl,"_blank");
-    if(!win){
-      // Popup blocked - try direct write fallback
-      var win2=window.open("","_blank");
-      if(win2){
-        win2.document.open();
-        win2.document.write(fullHTML);
-        win2.document.close();
-      } else {
-        addToast("Allow popups in your browser, then try again","warn",6000);
-      }
-    }
-    setTimeout(function(){URL.revokeObjectURL(blobUrl);},15000);
-  } catch(err){
-    addToast("PDF error: "+err.message,"warn",6000);
-  }
+  // Show as in-app full screen overlay using iframe
+  var existing=document.getElementById("pdf-overlay");
+  if(existing)existing.remove();
+
+  var overlay=document.createElement("div");
+  overlay.id="pdf-overlay";
+  overlay.style.cssText="position:fixed;inset:0;z-index:2000;background:#fff;display:flex;flex-direction:column";
+
+  var bar=document.createElement("div");
+  bar.style.cssText="background:#185FA5;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0";
+  bar.innerHTML='<button id="pdf-back-btn" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 14px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer">&#8592; Back to app</button>'
+    +'<button id="pdf-print-btn" style="background:#fff;color:#185FA5;border:none;padding:8px 14px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">Print / Save PDF</button>';
+
+  var iframe=document.createElement("iframe");
+  iframe.style.cssText="flex:1;width:100%;border:none";
+  iframe.setAttribute("sandbox","allow-same-origin allow-scripts allow-modals");
+
+  overlay.appendChild(bar);
+  overlay.appendChild(iframe);
+  document.body.appendChild(overlay);
+
+  bar.querySelector("#pdf-back-btn").addEventListener("click",function(){overlay.remove();});
+  bar.querySelector("#pdf-print-btn").addEventListener("click",function(){iframe.contentWindow.print();});
+
+  // Write content to iframe
+  var idoc=iframe.contentDocument||iframe.contentWindow.document;
+  idoc.open();
+  idoc.write(fullDoc);
+  idoc.close();
 }
 
 
@@ -1563,16 +1587,8 @@ function render(){
   var hs1=document.getElementById("hygiene-staff-1");if(hs1)hs1.addEventListener("input",function(e){modalAreas[1].hygieneStaff=e.target.value.slice(0,100);});
 
   // Documents tab navigation
-  var ddBtns=app.querySelectorAll("[data-docdate]");
-  for(var i=0;i<ddBtns.length;i++){(function(el){el.addEventListener("click",function(){docDate=el.dataset.docdate;docSite=null;docCheck=null;render();window.scrollTo({top:0,behavior:"smooth"});});})(ddBtns[i]);}
-  var dsBtns=app.querySelectorAll("[data-docsite]");
-  for(var i=0;i<dsBtns.length;i++){(function(el){el.addEventListener("click",function(){docSite=el.dataset.docsite;docCheck=null;render();window.scrollTo({top:0,behavior:"smooth"});});})(dsBtns[i]);}
-  var dckBtns=app.querySelectorAll("[data-doccheck]");
-  for(var i=0;i<dckBtns.length;i++){(function(el){el.addEventListener("click",function(){docCheck=el.dataset.doccheck;render();window.scrollTo({top:0,behavior:"smooth"});});})(dckBtns[i]);}
-  var dbcBtn=document.getElementById("doc-back-check");if(dbcBtn)dbcBtn.addEventListener("click",function(){docCheck=null;render();window.scrollTo({top:0,behavior:"smooth"});});
-  var dbsBtn=document.getElementById("doc-back-site");if(dbsBtn)dbsBtn.addEventListener("click",function(){docSite=null;docCheck=null;render();window.scrollTo({top:0,behavior:"smooth"});});
-  var dbdBtn=document.getElementById("doc-back-dates");if(dbdBtn)dbdBtn.addEventListener("click",function(){docDate=null;docSite=null;docCheck=null;render();window.scrollTo({top:0,behavior:"smooth"});});
-  var ddlBtn=document.getElementById("doc-download");if(ddlBtn)ddlBtn.addEventListener("click",function(){downloadFujiMiceForm(docDate);});
+  // doc navigation handled via inline onclick
+
 
   // Restore tab bar scroll position
   var newScrollX=app.querySelector(".scroll-x");
