@@ -633,9 +633,14 @@ function buildOverviewSiteDetail(site){
   } else {
     for(var i=0;i<missedChecks.length;i++){
       var ck=missedChecks[i];
+      var mAssign=assignments[ckKey(ds,site,ck.type,ck.sm)];
+      var mAssignStr=mAssign
+        ?'<div style="font-size:12px;color:#991b1b;font-weight:600;margin-top:3px">Assigned to: '+mAssign.assignedTo+'</div>'
+        :'<div style="font-size:12px;color:#94a3b8;margin-top:3px">Not assigned</div>';
       html+='<div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:11px 14px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">'+
         '<div><div style="font-weight:600;font-size:14px;color:#1e293b">'+CHECK_CFG[ck.type].label+'</div>'+
-        '<div style="font-size:12px;color:#64748b;margin-top:2px">Scheduled at '+fmtMin(ck.sm)+'</div></div>'+
+        '<div style="font-size:12px;color:#64748b;margin-top:2px">Scheduled at '+fmtMin(ck.sm)+'</div>'+
+        mAssignStr+'</div>'+
         '<span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:#fee2e2;color:#991b1b">Missed</span>'+
       '</div>';
     }
@@ -652,9 +657,12 @@ function buildOverviewSiteDetail(site){
     for(var i=0;i<lateChecks.length;i++){
       var ck=lateChecks[i];
       var logTime=ck.entry?new Date(ck.entry.loggedAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
+      var lAssign=assignments[ckKey(ds,site,ck.type,ck.sm)];
+      var lAssignStr=lAssign?'<div style="font-size:12px;color:#c2410c;font-weight:600;margin-top:3px">Assigned to: '+lAssign.assignedTo+'</div>':'<div style="font-size:12px;color:#94a3b8;margin-top:3px">Not assigned</div>';
       html+='<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:11px 14px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">'+
         '<div><div style="font-weight:600;font-size:14px;color:#1e293b">'+CHECK_CFG[ck.type].label+'</div>'+
-        '<div style="font-size:12px;color:#64748b;margin-top:2px">Scheduled '+fmtMin(ck.sm)+(ck.entry?' &middot; logged at '+logTime+' by '+ck.entry.name:'')+'</div></div>'+
+        '<div style="font-size:12px;color:#64748b;margin-top:2px">Scheduled '+fmtMin(ck.sm)+(ck.entry?' &middot; logged at '+logTime+' by '+ck.entry.name:'')+'</div>'+
+        lAssignStr+'</div>'+
         '<span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:#ffedd5;color:#c2410c">Late</span>'+
       '</div>';
     }
