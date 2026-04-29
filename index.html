@@ -1398,9 +1398,23 @@ function downloadFujiMiceForm(ds){
 
   overlay.appendChild(bar);
   overlay.appendChild(iframe);
+
+  // Hide the app completely so it doesn't bleed into print
+  var appEl=document.getElementById("app");
+  if(appEl)appEl.style.display="none";
+  document.body.style.overflow="hidden";
+  document.body.style.background="#fff";
+
+  function closePdfOverlay(){
+    overlay.remove();
+    if(appEl)appEl.style.display="";
+    document.body.style.overflow="";
+    document.body.style.background="";
+  }
+
   document.body.appendChild(overlay);
 
-  bar.querySelector("#pdf-back-btn").addEventListener("click",function(){overlay.remove();});
+  bar.querySelector("#pdf-back-btn").addEventListener("click",closePdfOverlay);
   bar.querySelector("#pdf-print-btn").addEventListener("click",function(){iframe.contentWindow.print();});
 
   // Write content to iframe
