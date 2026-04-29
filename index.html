@@ -1244,7 +1244,7 @@ function downloadFujiMiceForm(ds){
 
   function torchRowHTML(torchVal,torchAction,type){
     var display=torchVal?(torchVal==="Pass"?"Yes":"No"):"";
-    return '<tr style="background:#fef9c3"><td colspan="8" style="border:1px solid #000;padding:4px;font-size:7.5pt">'
+    return '<tr style="background:#fef9c3;-webkit-print-color-adjust:exact;print-color-adjust:exact"><td colspan="8" style="border:1px solid #000;padding:4px;font-size:7.5pt;background:#fef9c3">'
       +'Torch check '+type+' use compliant with the requirements? '
       +'<span style="'+(torchVal==="Pass"?"font-weight:bold":"")+'">Yes</span> / '
       +'<span style="'+(torchVal==="Fail"?"font-weight:bold":"")+'">No</span>'
@@ -1283,15 +1283,15 @@ function downloadFujiMiceForm(ds){
   }
 
   function thRow(){
-    return '<tr>'
-      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:18%">Area</th>'
-      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:8%">Intended Time</th>'
-      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:8%">Actual Time</th>'
-      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:8%">Pest Activity (Yes/No)</th>'
-      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:22%">Corrective Action</th>'
-      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:10%">Staff Sign & Number</th>'
-      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:14%">Area Cleaned by Hygiene? (YES/NO/N/A)</th>'
-      +'<th style="border:1px solid #000;padding:3px;font-size:7pt;width:10%">Staff Sign & Number</th>'
+    return '<tr style="background:#f5f5f5">'
+      +'<th style="border:1px solid #000;padding:4px;font-size:7.5pt;width:20%">Area</th>'
+      +'<th style="border:1px solid #000;padding:4px;font-size:7.5pt;width:8%">Intended Time of Check</th>'
+      +'<th style="border:1px solid #000;padding:4px;font-size:7.5pt;width:8%">Actual Time of Check</th>'
+      +'<th style="border:1px solid #000;padding:4px;font-size:7.5pt;width:8%">Pest activity evidence (Yes/No)</th>'
+      +'<th style="border:1px solid #000;padding:4px;font-size:7.5pt;width:22%">Corrective Action</th>'
+      +'<th style="border:1px solid #000;padding:4px;font-size:7.5pt;width:12%">Staff Sign & Number</th>'
+      +'<th style="border:1px solid #000;padding:4px;font-size:7.5pt;width:13%">Area Cleaned by Hygiene? (YES/NO/ N/A*)</th>'
+      +'<th style="border:1px solid #000;padding:4px;font-size:7.5pt;width:9%">Staff Sign & Number</th>'
       +'</tr>';
   }
 
@@ -1359,9 +1359,13 @@ function downloadFujiMiceForm(ds){
   }
 
   // Build final HTML doc
-  var fullDoc='<!DOCTYPE html><html><head><meta charset="UTF-8">'
-    +'<style>*{box-sizing:border-box}@page{size:A4;margin:0}body{margin:0;font-family:Arial,Helvetica,sans-serif}'
-    +'@media print{.no-print{display:none!important}}</style>'
+  var fullDoc='<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width">'
+    +'<style>'
+    +'*{box-sizing:border-box}'
+    +'@page{size:A4 landscape;margin:8mm}'
+    +'body{margin:0;font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}'
+    +'@media print{.no-print{display:none!important}body{margin:0}}'
+    +'</style>'
     +'<title>Fuji Mice Check '+dateLabel+'</title></head><body>'
     +'<div class="no-print" style="position:sticky;top:0;background:#185FA5;color:#fff;'
     +'padding:10px 16px;display:flex;justify-content:space-between;align-items:center;z-index:999">'
@@ -1381,7 +1385,7 @@ function downloadFujiMiceForm(ds){
 
   var overlay=document.createElement("div");
   overlay.id="pdf-overlay";
-  overlay.style.cssText="position:fixed;inset:0;z-index:2000;background:#fff;display:flex;flex-direction:column";
+  overlay.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:2000;background:#fff;display:flex;flex-direction:column;overflow:hidden";
 
   var bar=document.createElement("div");
   bar.style.cssText="background:#185FA5;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0";
@@ -1389,7 +1393,7 @@ function downloadFujiMiceForm(ds){
     +'<button id="pdf-print-btn" style="background:#fff;color:#185FA5;border:none;padding:8px 14px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">Print / Save PDF</button>';
 
   var iframe=document.createElement("iframe");
-  iframe.style.cssText="flex:1;width:100%;border:none";
+  iframe.style.cssText="flex:1;width:100%;height:100%;border:none;display:block;min-height:0";
   iframe.setAttribute("sandbox","allow-same-origin allow-scripts allow-modals");
 
   overlay.appendChild(bar);
